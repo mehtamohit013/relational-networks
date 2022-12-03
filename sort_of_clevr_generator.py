@@ -66,7 +66,7 @@ def center_generate(objects):
 
 
 
-def build_dataset(ind,type):
+def build_dataset(ind,type,dirs,df):
     objects = []
     state = pd.DataFrame()
     img = np.ones((img_size,img_size,3)) * 255  #(75X75X3) (W,H,C)
@@ -89,11 +89,11 @@ def build_dataset(ind,type):
     state['shape'] = [shape_name[i[2]] for i in objects]
     state['size'] = [size]*len(objects)         # For Square/Rectangle it is side length, For circle it is radius
 
-    os.makedirs(f'./data/{type}/state',exist_ok=True)
-    os.makedirs(f'./data/{type}/img',exist_ok=True)
+    # os.makedirs(f'{dirs}/{type}/state',exist_ok=True)
+    # state.to_csv(f'{dirs}/{type}/state/state_{ind}.csv')
     
-    state.to_csv(f'./data/{type}/state/state_{ind}.csv')
-    np.savez(f'./data/{type}/img/img_{ind}.npz',img=img)
+    os.makedirs(f'{dirs}/{type}/img',exist_ok=True)
+    np.savez(f'{dirs}/{type}/img/img_{ind}.npz',img=img)
 
 
     ternary_questions = []
@@ -307,17 +307,35 @@ def build_dataset(ind,type):
     
     img = img/255.
     dataset = (img, ternary_relations, binary_relations, norelations)
-    return dataset
 
+    new_row = pd.Series({'Image':f'./data/img/img_{ind}.npz',
+                'State':state,
+                'Ternary QA': ternary_relations,
+                'Binary QA': binary_relations,
+                'Unary QA': norelations})
 
-print('building test datasets...')
-test_datasets = [build_dataset(i,'test') for i in tqdm.tqdm(range(test_size),desc='Test Set')]
-print('building train datasets...')
-train_datasets = [build_dataset(i,'train') for i in tqdm.tqdm(range(train_size),desc='Train Set')]
+    df = pd.concat([df,new_row.to_frame().T],ignore_index=True)
 
+    return dataset,df
 
-#img_count = 0
-#cv2.imwrite(os.path.join(dirs,'{}.png'.format(img_count)), cv2.resize(train_datasets[0][0]*255, (512,512)))
+test_df = pd.DataFrame(columns=["Image","State","Ternary QA","Binary QA","Unary QA"])
+train_df = pd.DataFrame(columns=["Image","State","Ternary QA","Binary QA","Unary QA"])
+test_datasets = []
+train_datasets = []
+
+print('Building test datasets...')
+for i in tqdm.tqdm(range(test_size),desc='Test Set'):
+    tmp_test,test_df = build_dataset(i,'test',dirs,test_df)
+    test_datasets.append(tmp_test)
+
+print('Building train datasets...')
+for i in tqdm.tqdm(range(train_size),desc='Train Set'):
+    tmp_train,train_df = build_dataset(i,'train',dirs,train_df)
+    train_datasets.append(tmp_train)
+
+print('Saving Datasets...')
+test_df.to_pickle(f'{dirs}/test_df.pkl')
+train_df.to_pickle(f'{dirs}/train_df.pkl')
 
 
 '''
@@ -328,7 +346,7 @@ ternary relations -> (ternary_questions, ternary_answers)
     10 ternary answers with shape being [yes, no, rectangle, circle, r, g, b, o, k, y]. Note that r,b,g,o,k,y act as number in some question types
 Same for binary and no relations questions
 '''
-print('saving datasets...')
+
 filename = os.path.join(dirs,'sort-of-clevr.pickle')
 with  open(filename, 'wb') as f:
     pickle.dump((train_datasets, test_datasets), f)
