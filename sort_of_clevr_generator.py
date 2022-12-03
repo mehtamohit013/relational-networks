@@ -175,7 +175,7 @@ def expand_ternary(relations):
     return [ques_expanded,ans_expanded]
 
 
-def build_dataset(ind,type,dirs,df):
+def build_dataset(ind,type,dirs):
     objects = []
     state = pd.DataFrame()
     img = np.ones((img_size,img_size,3)) * 255  #(75X75X3) (W,H,C)
@@ -444,31 +444,39 @@ def build_dataset(ind,type,dirs,df):
 
     # df = pd.concat([df,new_row.to_frame().T],ignore_index=True)
     
-    df = pd.concat([df,new_df],ignore_index=True)
+    # df = pd.concat([df,new_df],ignore_index=True)
 
-    return dataset,df
+    return dataset,new_df
 
-test_df = pd.DataFrame(columns=["Image","State",
-                                "Question","Answer",
-                                "Relation","Ques Type"])
+# test_df = pd.DataFrame(columns=["Image","State",
+#                                 "Question","Answer",
+#                                 "Relation","Ques Type"])
 
-train_df = pd.DataFrame(columns=["Image","State",
-                                "Question","Answer",
-                                "Relation","Ques Type"])
+# train_df = pd.DataFrame(columns=["Image","State",
+#                                 "Question","Answer",
+#                                 "Relation","Ques Type"])
 test_datasets = []
 train_datasets = []
 
+test_df_list = []
+train_df_list = []
+
 print('Building test datasets...')
 for i in tqdm.tqdm(range(test_size),desc='Test Set'):
-    tmp_test,test_df = build_dataset(i,'test',dirs,test_df)
+    tmp_test,tmp_test_df = build_dataset(i,'test',dirs)
+    test_df_list.append(tmp_test_df)
     test_datasets.append(tmp_test)
 
 print('Building train datasets...')
 for i in tqdm.tqdm(range(train_size),desc='Train Set'):
-    tmp_train,train_df = build_dataset(i,'train',dirs,train_df)
+    tmp_train,tmp_train_df = build_dataset(i,'train',dirs)
+    train_df_list.append(tmp_train_df)
     train_datasets.append(tmp_train)
 
 print('Saving Datasets...')
+train_df = pd.concat(train_df_list,ignore_index=True)
+test_df = pd.concat(test_df_list,ignore_index=True)
+
 test_df.to_csv(f'{dirs}/test_df.csv')
 train_df.to_csv(f'{dirs}/train_df.csv')
 
