@@ -6,6 +6,7 @@ import random
 import pickle
 import warnings
 import argparse
+import time
 
 import pandas as pd
 import tqdm
@@ -467,19 +468,23 @@ for i in tqdm.tqdm(range(test_size),desc='Test Set'):
     test_df_list.append(tmp_test_df)
     test_datasets.append(tmp_test)
 
+start = time.time()
+print(f'Combining test dataset and saving....')
+test_df = pd.concat(test_df_list,ignore_index=True)
+test_df.to_pickle(f'{dirs}/test_df.pkl')
+print(f'Done. Time taken: {time.time()-start}')
+
 print('Building train datasets...')
 for i in tqdm.tqdm(range(train_size),desc='Train Set'):
     tmp_train,tmp_train_df = build_dataset(i,'train',dirs)
     train_df_list.append(tmp_train_df)
     train_datasets.append(tmp_train)
 
-print('Saving Datasets...')
+start = time.time()
+print(f'Combining train dataset and saving....')
 train_df = pd.concat(train_df_list,ignore_index=True)
-test_df = pd.concat(test_df_list,ignore_index=True)
-
-test_df.to_csv(f'{dirs}/test_df.csv')
-train_df.to_csv(f'{dirs}/train_df.csv')
-
+train_df.to_pickle(f'{dirs}/train_df.pkl')
+print(f'Done. Time taken: {time.time()-start}')
 
 '''
 Dataset is stored as (Number of samples) -> (img,ternary relations, binary relations, norelations) 
