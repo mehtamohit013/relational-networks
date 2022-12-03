@@ -69,7 +69,7 @@ def expand_unary(relations):
     
     ques_expanded = []
     ans_expanded = []
-    
+    subtype = []
     n = len(ques)
     colors_name = ['red','green','blue','orange','grey','yellow']
     
@@ -81,30 +81,34 @@ def expand_unary(relations):
                 break
         if ques[i][15]==1:
             ques_expanded.append(f'What is the shape of the {colors} object?')
+            subtype.append(1)
             if ans[i]==2:
                 ans_expanded.append('Rectangle')
             else:
                 ans_expanded.append('Circle')
         elif ques[i][16]==1:
             ques_expanded.append(f'Is there a {colors} colored object in right half of the image?')
+            subtype.append(2)
             if ans[i]==0:
                 ans_expanded.append('No')
             else:
                 ans_expanded.append('Yes')
         elif ques[i][16]==1:
             ques_expanded.append(f'Is there a {colors} colored object in top half of the image?')
+            subtype.append(3)
             if ans[i]==0:
                 ans_expanded.append('No')
             else:
                 ans_expanded.append('Yes')
     
-    return [ques_expanded,ans_expanded]
+    return [ques_expanded,ans_expanded,subtype]
 
 def expand_binary(relations):
     ques,ans = relations
     
     ques_expanded = []
     ans_expanded = []
+    subtype = []
     
     n = len(ques)
     colors_name = ['red','green','blue','orange','grey','yellow']
@@ -117,21 +121,24 @@ def expand_binary(relations):
                 break
         if ques[i][15]==1:
             ques_expanded.append(f'What is the shape of the closest object to {colors} colored object?')
+            subtype.append(1)
             if ans[i]==2:
                 ans_expanded.append('Rectangle')
             else:
                 ans_expanded.append('Circle')
         elif ques[i][16]==1:
             ques_expanded.append(f'What is the shape of the furtherest object to {colors} colored object?')
+            subtype.append(2)
             if ans[i]==2:
                 ans_expanded.append('Rectangle')
             else:
                 ans_expanded.append('Circle')
         elif ques[i][16]==1:
             ques_expanded.append(f'How many objects are similiar in shape to {colors} colored object?')
+            subtype.append(3)
             ans_expanded.append(ans[i]-4)
     
-    return [ques_expanded,ans_expanded]
+    return [ques_expanded,ans_expanded,subtype]
 
 def expand_ternary(relations):
     ques,ans = relations
@@ -414,26 +421,40 @@ def build_dataset(ind,type,dirs,df):
     img = img/255.
     dataset = (img, ternary_relations, binary_relations, norelations)
 
-    new_row = pd.Series({'Image':f'./data/img/img_{ind}.npz',
-                'State':state,
-                'Ternary QA': ternary_relations,
-                'Binary QA': binary_relations,
-                'Unary QA': norelations,
-                "Ternary Exp": ternary_exp,
-                "Binary Exp": binary_exp,
-                "Unary Exp": unary_exp})
+    # Only taking Unary and binary 
+    n_un,n_bi = len(unary_exp[0]),len(binary_exp[0])
 
-    df = pd.concat([df,new_row.to_frame().T],ignore_index=True)
+    new_df = pd.DataFrame({
+        'Image': [f'./data/img/img_{ind}.npz']*(n_un+n_bi),
+        'State': [state]*(n_un+n_bi),
+        'Question': unary_exp[0] + binary_exp[0],
+        'Answer': unary_exp[1] + binary_exp[1],
+        'Relation': ['unary']*(n_un) + ['binary']*(n_bi),
+        'Ques type': unary_exp[2] + binary_exp[2]
+    })
+
+    # new_row = pd.Series({'Image':f'./data/img/img_{ind}.npz',
+    #             'State':state,
+    #             'Ternary QA': ternary_relations,
+    #             'Binary QA': binary_relations,
+    #             'Unary QA': norelations,
+    #             "Ternary Exp": ternary_exp,
+    #             "Binary Exp": binary_exp,
+    #             "Unary Exp": unary_exp})
+
+    # df = pd.concat([df,new_row.to_frame().T],ignore_index=True)
+    
+    df = pd.concat([df,new_df],ignore_index=True)
 
     return dataset,df
 
 test_df = pd.DataFrame(columns=["Image","State",
-                                "Ternary QA","Binary QA","Unary QA",
-                                "Ternary Exp","Binary Exp","Unary Exp"])
+                                "Question","Answer",
+                                "Relation","Ques Type"])
 
 train_df = pd.DataFrame(columns=["Image","State",
-                                "Ternary QA","Binary QA","Unary QA",
-                                "Ternary Exp","Binary Exp","Unary Exp"])
+                                "Question","Answer",
+                                "Relation","Ques Type"])
 test_datasets = []
 train_datasets = []
 
@@ -448,8 +469,8 @@ for i in tqdm.tqdm(range(train_size),desc='Train Set'):
     train_datasets.append(tmp_train)
 
 print('Saving Datasets...')
-test_df.to_pickle(f'{dirs}/test_df.pkl')
-train_df.to_pickle(f'{dirs}/train_df.pkl')
+test_df.to_csv(f'{dirs}/test_df.csv')
+train_df.to_csv(f'{dirs}/train_df.csv')
 
 
 '''
