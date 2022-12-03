@@ -64,6 +64,108 @@ def center_generate(objects):
         if pas:
             return center
 
+def expand_unary(relations):
+    ques,ans = relations
+    
+    ques_expanded = []
+    ans_expanded = []
+    
+    n = len(ques)
+    colors_name = ['red','green','blue','orange','grey','yellow']
+    
+    for i in range(n):
+        colors = None
+        for j in range(len(colors_name)):
+            if ques[i][j]==1:
+                colors = colors_name[j]
+                break
+        if ques[i][15]==1:
+            ques_expanded.append(f'What is the shape of the {colors} object?')
+            if ans[i]==2:
+                ans_expanded.append('Rectangle')
+            else:
+                ans_expanded.append('Circle')
+        elif ques[i][16]==1:
+            ques_expanded.append(f'Is there a {colors} colored object in right half of the image?')
+            if ans[i]==0:
+                ans_expanded.append('No')
+            else:
+                ans_expanded.append('Yes')
+        elif ques[i][16]==1:
+            ques_expanded.append(f'Is there a {colors} colored object in top half of the image?')
+            if ans[i]==0:
+                ans_expanded.append('No')
+            else:
+                ans_expanded.append('Yes')
+    
+    return [ques_expanded,ans_expanded]
+
+def expand_binary(relations):
+    ques,ans = relations
+    
+    ques_expanded = []
+    ans_expanded = []
+    
+    n = len(ques)
+    colors_name = ['red','green','blue','orange','grey','yellow']
+    
+    for i in range(n):
+        colors = None
+        for j in range(len(colors_name)):
+            if ques[i][j]==1:
+                colors = colors_name[j]
+                break
+        if ques[i][15]==1:
+            ques_expanded.append(f'What is the shape of the closest object to {colors} colored object?')
+            if ans[i]==2:
+                ans_expanded.append('Rectangle')
+            else:
+                ans_expanded.append('Circle')
+        elif ques[i][16]==1:
+            ques_expanded.append(f'What is the shape of the furtherest object to {colors} colored object?')
+            if ans[i]==2:
+                ans_expanded.append('Rectangle')
+            else:
+                ans_expanded.append('Circle')
+        elif ques[i][16]==1:
+            ques_expanded.append(f'How many objects are similiar in shape to {colors} colored object?')
+            ans_expanded.append(ans[i]-4)
+    
+    return [ques_expanded,ans_expanded]
+
+def expand_ternary(relations):
+    ques,ans = relations
+    
+    ques_expanded = []
+    ans_expanded = []
+    
+    n = len(ques)
+    colors_name = ['red','green','blue','orange','grey','yellow']
+    
+    for i in range(n):
+        colors = []
+        for j in range(len(colors_name)):
+            if ques[i][j]==1:
+                colors.append(colors_name[j])
+                break
+        for j in range(6,2*len(colors_name)):
+            if ques[i][j]==1:
+                colors.append(colors_name[j-6])
+        # print(colors)
+        if ques[i][15]==1:
+            ques_expanded.append(f'How many objects are there between {colors[0]} and {colors[1]} colored object?')
+            ans_expanded.append(ans[i]-4)
+        elif ques[i][16]==1:
+            ques_expanded.append(f'Is there any object on the line joining center of {colors[0]} and {colors[1]} object?')
+            if ans[i]==0:
+                ans_expanded.append('Yes')
+            else:
+                ans_expanded.append('No')
+        elif ques[i][16]==1:
+            ques_expanded.append(f'How many obtuse angled triangle can be formed with two vertices being {colors[0]} and {colors[1]} object center?')
+            ans_expanded.append(ans[i]-4)
+    
+    return [ques_expanded,ans_expanded]
 
 
 def build_dataset(ind,type,dirs,df):
@@ -91,7 +193,7 @@ def build_dataset(ind,type,dirs,df):
 
     # os.makedirs(f'{dirs}/{type}/state',exist_ok=True)
     # state.to_csv(f'{dirs}/{type}/state/state_{ind}.csv')
-    
+
     os.makedirs(f'{dirs}/{type}/img',exist_ok=True)
     np.savez(f'{dirs}/{type}/img/img_{ind}.npz',img=img)
 
@@ -305,6 +407,10 @@ def build_dataset(ind,type,dirs,df):
     binary_relations = (binary_questions, binary_answers)
     norelations = (norel_questions, norel_answers)
     
+    ternary_exp = expand_ternary(ternary_relations)
+    binary_exp = expand_binary(binary_relations)
+    unary_exp = expand_unary(norelations)
+
     img = img/255.
     dataset = (img, ternary_relations, binary_relations, norelations)
 
@@ -312,14 +418,22 @@ def build_dataset(ind,type,dirs,df):
                 'State':state,
                 'Ternary QA': ternary_relations,
                 'Binary QA': binary_relations,
-                'Unary QA': norelations})
+                'Unary QA': norelations,
+                "Ternary Exp": ternary_exp,
+                "Binary Exp": binary_exp,
+                "Unary Exp": unary_exp})
 
     df = pd.concat([df,new_row.to_frame().T],ignore_index=True)
 
     return dataset,df
 
-test_df = pd.DataFrame(columns=["Image","State","Ternary QA","Binary QA","Unary QA"])
-train_df = pd.DataFrame(columns=["Image","State","Ternary QA","Binary QA","Unary QA"])
+test_df = pd.DataFrame(columns=["Image","State",
+                                "Ternary QA","Binary QA","Unary QA",
+                                "Ternary Exp","Binary Exp","Unary Exp"])
+
+train_df = pd.DataFrame(columns=["Image","State",
+                                "Ternary QA","Binary QA","Unary QA",
+                                "Ternary Exp","Binary Exp","Unary Exp"])
 test_datasets = []
 train_datasets = []
 
