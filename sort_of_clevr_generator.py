@@ -7,6 +7,9 @@ import pickle
 import warnings
 import argparse
 
+import pandas as pd
+import tqdm
+
 parser = argparse.ArgumentParser(description='Sort-of-CLEVR dataset generator')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
@@ -38,6 +41,12 @@ colors = [
     (0,255,255)##y
 ]
 
+colors_name = ['Red','Green','Blue','Orange','Grey','Yellow']
+shape_name = {
+    'r': 'Rectangle',
+    'c': 'Circle'
+}
+
 
 try:
     os.makedirs(dirs)
@@ -47,30 +56,44 @@ except:
 def center_generate(objects):
     while True:
         pas = True
-        center = np.random.randint(0+size, img_size - size, 2)        
+        center = np.random.randint(0+size, img_size - size, 2)   # Returns a list of two numbers between [size,img_size-size)     
         if len(objects) > 0:
             for name,c,shape in objects:
-                if ((center - c) ** 2).sum() < ((size * 2) ** 2):
+                if ((center - c) ** 2).sum() < ((size * 2) ** 2):   # Checking if the already given object overlap with one present in image
                     pas = False
         if pas:
             return center
 
 
 
-def build_dataset():
+def build_dataset(ind,type):
     objects = []
-    img = np.ones((img_size,img_size,3)) * 255
+    state = pd.DataFrame()
+    img = np.ones((img_size,img_size,3)) * 255  #(75X75X3) (W,H,C)
     for color_id,color in enumerate(colors):  
         center = center_generate(objects)
         if random.random()<0.5:
-            start = (center[0]-size, center[1]-size)
-            end = (center[0]+size, center[1]+size)
-            cv2.rectangle(img, start, end, color, -1)
-            objects.append((color_id,center,'r'))
+            start = (center[0]-size, center[1]-size) # Range is [0,img_size-2*size)
+            end = (center[0]+size, center[1]+size)  # Range is  [2*size,img_size)
+            cv2.rectangle(img, start, end, color, -1)   # Drawing a square
+
+            # Wierd way of storing a object
+            objects.append((color_id,center,'r'))   # Making it color equal to color_id from enumerate colors.
         else:
-            center_ = (center[0], center[1])
-            cv2.circle(img, center_, size, color, -1)
+            center_ = (center[0], center[1])   
+            cv2.circle(img, center_, size, color, -1) # Else Drawing a circle of radius size
             objects.append((color_id,center,'c'))
+
+    state['center'] = [i[1] for i in objects]
+    state['color'] = [colors_name[i[0]] for i in objects]
+    state['shape'] = [shape_name[i[2]] for i in objects]
+    state['size'] = [size]*len(objects)         # For Square/Rectangle it is side length, For circle it is radius
+
+    os.makedirs(f'./data/{type}/state',exist_ok=True)
+    os.makedirs(f'./data/{type}/img',exist_ok=True)
+    
+    state.to_csv(f'./data/{type}/state/state_{ind}.csv')
+    np.savez(f'./data/{type}/img/img_{ind}.npz',img=img)
 
 
     ternary_questions = []
@@ -79,16 +102,24 @@ def build_dataset():
     ternary_answers = []
     binary_answers = []
     norel_answers = []
-    """Non-relational questions"""
+
+    '''
+    10 Non-Relational Type Questions
+
+    Subtype 0: What is the shape of the object?
+    Subtype 1: Whether the object is in right half or left half of the image? 0 for left and 1 for right
+    Subtype 2: Whether the object is in top half or bottom half of the image? 0 for bottom and 1 for top
+    Answer : [yes, no, rectangle, circle, r, g, b, o, k, y]
+    '''
     for _ in range(nb_questions):
-        question = np.zeros((question_size))
+        question = np.zeros((question_size))    # 2 x (6 for one-hot vector of color), 3 for question type, 3 for question subtype
         color = random.randint(0,5)
-        question[color] = 1
-        question[q_type_idx] = 1
-        subtype = random.randint(0,2)
-        question[subtype+sub_q_type_idx] = 1
-        norel_questions.append(question)
-        """Answer : [yes, no, rectangle, circle, r, g, b, o, k, y]"""
+        question[color] = 1                     # Randomly choosing a color out of six possible colors 
+        question[q_type_idx] = 1                # 12th index, of the questions array is 1 array
+        subtype = random.randint(0,2)           # Randomly choosing the question-subtype
+        question[subtype+sub_q_type_idx] = 1    
+        norel_questions.append(question)        # Appending it to non relation questions
+        
         if subtype == 0:
             """query shape->rectangle/circle"""
             if objects[color][2] == 'r':
@@ -111,7 +142,14 @@ def build_dataset():
                 answer = 1
         norel_answers.append(answer)
     
-    """Binary Relational questions"""
+    '''
+    10 Binary relation questions
+
+    Subtype 0: What is the closest object (a rectangle or circle) to a randomly choosen colored object?
+    Subtype 1: What is the furthest object (a rectangle or circle) to a randomly choosen colored object?
+    Subtype 2: Number of objects similiar in shape to a randomly choosen colored object. Max can be 6
+    '''
+
     for _ in range(nb_questions):
         question = np.zeros((question_size))
         color = random.randint(0,5)
@@ -153,8 +191,18 @@ def build_dataset():
 
         binary_answers.append(answer)
 
-    """Ternary Relational questions"""
+    '''
+    10 Ternary Relational questions
+
+    Subtype 0: Checks how many objects lie between the two randomly choosen objects. Max can be 4
+    Subtype 1: Checks if any object center lies on the line connecting the centers of two randomly choosen objects
+    Subtype 2: Checks whether the traingle formed with all objects with the two randomly choosen objects is obtuse or not
+    '''
     for _ in range(nb_questions):
+
+        '''
+        Choosing Two random colored objects
+        '''
         question = np.zeros((question_size))
         rnd_colors = np.random.permutation(np.arange(5))
         # 1st object
@@ -263,15 +311,23 @@ def build_dataset():
 
 
 print('building test datasets...')
-test_datasets = [build_dataset() for _ in range(test_size)]
+test_datasets = [build_dataset(i,'test') for i in tqdm.tqdm(range(test_size),desc='Test Set')]
 print('building train datasets...')
-train_datasets = [build_dataset() for _ in range(train_size)]
+train_datasets = [build_dataset(i,'train') for i in tqdm.tqdm(range(train_size),desc='Train Set')]
 
 
 #img_count = 0
 #cv2.imwrite(os.path.join(dirs,'{}.png'.format(img_count)), cv2.resize(train_datasets[0][0]*255, (512,512)))
 
 
+'''
+Dataset is stored as (Number of samples) -> (img,ternary relations, binary relations, norelations) 
+img -> 75X75X3
+ternary relations -> (ternary_questions, ternary_answers) 
+    10 ternary questions per image with shape 2 x (6 for one-hot vector of color), 3 for question type, 3 for question subtype
+    10 ternary answers with shape being [yes, no, rectangle, circle, r, g, b, o, k, y]. Note that r,b,g,o,k,y act as number in some question types
+Same for binary and no relations questions
+'''
 print('saving datasets...')
 filename = os.path.join(dirs,'sort-of-clevr.pickle')
 with  open(filename, 'wb') as f:

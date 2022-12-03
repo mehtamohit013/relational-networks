@@ -51,7 +51,7 @@ summary_writer = SummaryWriter()
 if args.model=='CNN_MLP': 
   model = CNN_MLP(args)
 else:
-  model = RN(args)
+  model = RN( )
   
 model_dirs = './model'
 bs = args.batch_size
@@ -77,6 +77,8 @@ def tensor_data(data, i):
     input_img.data.resize_(img.size()).copy_(img)
     input_qst.data.resize_(qst.size()).copy_(qst)
     label.data.resize_(ans.size()).copy_(ans)
+
+    del img,qst,ans
 
 
 def cvt_data_axis(data):
@@ -156,6 +158,8 @@ def train(epoch, ternary, rel, norel):
         'unary': avg_loss_unary
     }, epoch)
 
+    del ternary, rel, norel
+
     # return average accuracy
     return avg_acc_ternary, avg_acc_binary, avg_acc_unary
 
@@ -214,6 +218,8 @@ def test(epoch, ternary, rel, norel):
         'binary': loss_binary,
         'unary': loss_unary
     }, epoch)
+
+    del ternary, rel, norel
 
     return accuracy_ternary, accuracy_rel, accuracy_norel
 
