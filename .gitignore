@@ -160,3 +160,4 @@ static
 *.pdf
 *.csv
 content
+*logs
