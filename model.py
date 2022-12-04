@@ -171,20 +171,21 @@ class RN(BasicModel):
             # add question everywhere
             qst = torch.unsqueeze(qst, 1)
             qst = qst.repeat(1, 25, 1)
-            qst = torch.unsqueeze(qst, 2)
+            qst = torch.unsqueeze(qst, 2) #(64,25,1,18)
 
             # cast all pairs against each other
-            x_i = torch.unsqueeze(x_flat, 1)  # (64x1x25x26+18)
-            x_i = x_i.repeat(1, 25, 1, 1)  # (64x25x25x26+18)
-            x_j = torch.unsqueeze(x_flat, 2)  # (64x25x1x26+18)
-            x_j = torch.cat([x_j, qst], 3)
-            x_j = x_j.repeat(1, 1, 25, 1)  # (64x25x25x26+18)
+            x_i = torch.unsqueeze(x_flat, 1)  # (64, 1, 25, 26)
+            x_i = x_i.repeat(1, 25, 1, 1)  # (64,25,25,26)
+
+            x_j = torch.unsqueeze(x_flat, 2)  # (64, 25, 1, 26)
+            x_j = torch.cat([x_j, qst], 3)    # (64,25,1,26+18) = (64,25,1,44) 
+            x_j = x_j.repeat(1, 1, 25, 1)  # (64,25,25,44)
             
             # concatenate all together
-            x_full = torch.cat([x_i,x_j],3) # (64x25x25x2*26+18)
+            x_full = torch.cat([x_i,x_j],3) # (64,25,25,2*26+18) = (64,25,25,70)
         
             # reshape for passing through network
-            x_ = x_full.view(mb * (d * d) * (d * d), 70)  # (64*25*25x2*26*18) = (40.000, 70)
+            x_ = x_full.view(mb * (d * d) * (d * d), 70)  # (64*25*25,2*26*18) = (40000, 70)
             
         x_ = self.g_fc1(x_)
         x_ = F.relu(x_)

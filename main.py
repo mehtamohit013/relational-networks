@@ -51,7 +51,7 @@ summary_writer = SummaryWriter()
 if args.model=='CNN_MLP': 
   model = CNN_MLP(args)
 else:
-  model = RN( )
+  model = RN(args)
   
 model_dirs = './model'
 bs = args.batch_size
