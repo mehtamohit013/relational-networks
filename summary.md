@@ -1,5 +1,10 @@
 # Relational Networks for VQA
 
+ Mohit Mehta(mm12318)&nbsp;&nbsp;&nbsp; Umang Shah(uks8451)&nbsp;&nbsp;&nbsp; Surya Narayana(sn3402)
+<hr>
+
+
+
 ## Dataset
 The dataset used for VQA generally comprises images and questions that can be answered from the image. The question can broadly be classified into 
 1. Relational : 
@@ -108,7 +113,7 @@ since the RN does not take pixels of an image as input anyway, Input can be desc
 
 ### 3. Question
 
-The type of relations learned by RN should be question dependent. The implementation modifies the RN architecture that can be functionally represented below. where q denotes the question embeddings. 
+The type of relations learned by RN should depend on the question aswell. The implementation modifies the RN architecture that can be functionally represented below. where q denotes the question embeddings. 
 
 $$ RN(O) = f_{\phi} (\Sigma_{i,j}g_{\theta}(o_i,o_j,q)) $$
 
@@ -136,7 +141,7 @@ For datasets such as bAbI, where information about the object also needs to be e
 In our implementation, the relation part of our RNN consists of 4 fully connected neural layers having the dimensions as discussed below
     - Layer 1: <br/>
     Input: (batch_size * (24+2) * 2+18 ) x 70
-    where 24 is the number of kernels, 2 is the size co-ordinate representation for the object. This is multiplied by 2 since we process pair of objects at a go. 18 is the size of the embedding for the question.<br/>
+    where 24 is the number of kernels, 2 is the size coordinate representation for the object. This is multiplied by 2 since we process pair of objects at a go. 18 is the size of the embedding for the question.<br/>
     Output: 256
 
     - Layer 2 - 4: <br/>
@@ -207,20 +212,67 @@ Single layer with input = output = 256
     ```
 - Optimizer: <br/>
     The CNN + RN is trained using adam Gradient Descent Optimizer end to end
+
+- Tuning of model:
+
+    When setting the seed value to 42 with a learning rate = 0.0001,  an accuracy of 97% on training data and 91%  on test data was achieved for relational questions after 40 epochs.
+
+    Similarly, an accuracy of 99% was achieved on both test and training data for the non-relational model
+
+    Non relational accuracy over epoch.
+    ![Non-Relational Accuracy](images/task-1-unary-accuracy.png)
+
+    Relational accuracy over epoch
+    ![Non-Relational Accuracy](images/task1-binary-accuracy.png)
+
+    [CSV for relational train accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_train_unary-tag-Accuracy_train.csv)
+
+    [CSV for relational test accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_test_unary-tag-Accuracy_test.csv)
+
+    [CSV for non-relational train accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_train_binary-tag-Accuracy_train.csv)
+
+    [CSV for non-relational test accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_test_binary-tag-Accuracy_test.csv)
+
+- Other attempts at tuning
+
+    When training the model with a higher learning rate (0.0005), It took 60 epochs for the accuracies to stabilize to (3% in the test and 96% on training data. 
+    
+    Since we achieve a good enough accuracy with low epochs, we consider afore mentioned result as a more practical outcome. 
 ### Task 2: State Description + LTSM + RN
 In this task, we take a state description as input instead of an image. This eliminates the need for CNN as this information can directly be processed by RNN. 
 
-- Since we are training on SORT-Of-CLEVR, the state description for each 
+- Since we are training on SORT-Of-CLEVR, the state description for each image will have 6 rows with the following columns center_x, center_y, shape, and color. All text values are replaced by integers starting from 1 by creating appropriate vocabularies.
 
-- Also, instead of using question embedding directly, we use LSTM which outputs a vector of size 128 for each question.
+- Each object can be described in 4 numeric values. These are then passed to the RN model.
 
+- For the question part, instead of using question embedding directly from SORT-Of-CLEVR, we generate them using LSTM which is a vector of size 128.
 
-
-- LSTM <br/>
-todo: explain
-
-- RN <br/>
-todo: explain the dimensions of each layer
+- This task avoids the complexities and errors arising due to CNN but introduces NLP-related complexities.
 
 
+LSTM
 
+- As per the recommendation from the paper, LSTM was implemented having the following configurations.
+    - Questions are passed to LSTM with shape batch_size x w x v, where w is the number of tokens in question and v is the size of vocab (39)
+    - The hidden state is of size 128.
+    - Randomly generated integers for the weights of initial state h0 ( the hidden state at the zeroth timestamp), c0 (the cell state at the zeroth timestamp). Alternatively, these can also be initialized with zeros.
+    - The output of this LSTM would be a vector of shape BATCH_SIZE x 128
+
+RN 
+- RN in this case only differs from task 1 in terms of input. 
+
+- The input layer will take a vector of shape
+(batch_size * 6 * 6) x 4
+
+- Subsequent hidden layers will stay of same dimensions as before (task 1)
+
+- The output layer is of dimension batch_size x vocab_size.
+
+Tuning
+
+- The initial learning to start the tuning was determined using the "Bayesian Method" provided by PyTorch-lightning APIs. 
+- The initial learning rate determined by the above approach was approx. <b>0.0003</b> resulting in training and testing accuracy of around <b>94%</b> after <b>40</b> epochs.
+
+
+![Non-Relational Accuracy](images/task2-combined-accuracy.png)
+- All further explorations performed either similar or poorer than the results above.
