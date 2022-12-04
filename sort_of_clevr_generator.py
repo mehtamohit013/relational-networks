@@ -94,7 +94,7 @@ def expand_unary(relations):
                 ans_expanded.append('No')
             else:
                 ans_expanded.append('Yes')
-        elif ques[i][16]==1:
+        elif ques[i][17]==1:
             ques_expanded.append(f'Is there a {colors} colored object in top half of the image?')
             subtype.append(3)
             if ans[i]==0:
@@ -134,7 +134,7 @@ def expand_binary(relations):
                 ans_expanded.append('Rectangle')
             else:
                 ans_expanded.append('Circle')
-        elif ques[i][16]==1:
+        elif ques[i][17]==1:
             ques_expanded.append(f'How many objects are similiar in shape to {colors} colored object?')
             subtype.append(3)
             ans_expanded.append(ans[i]-4)
@@ -169,7 +169,7 @@ def expand_ternary(relations):
                 ans_expanded.append('Yes')
             else:
                 ans_expanded.append('No')
-        elif ques[i][16]==1:
+        elif ques[i][17]==1:
             ques_expanded.append(f'How many obtuse angled triangle can be formed with two vertices being {colors[0]} and {colors[1]} object center?')
             ans_expanded.append(ans[i]-4)
     
