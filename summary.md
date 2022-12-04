@@ -206,6 +206,8 @@ Single layer with input = output = 256
             ans = F.log_softmax(x, dim=1)
             return ans
     ```
+- Optimizer: <br/>
+    The CNN + RN is trained using adam Gradient Descent Optimizer end to end
 ### Task 2: State Description + LTSM + RN
 
 - In this task we take state description as input instead of image. This eliminates the need for CNN as this information can directly be processed by RNN
