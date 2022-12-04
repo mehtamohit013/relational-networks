@@ -158,7 +158,6 @@ static
 .idea
 *.zip
 *.pdf
-*.csv
 content
 *logs
 
