@@ -1,71 +1,70 @@
 # Relational Networks for VQA
 
 ## Dataset
-Dataset used for VQA generally comprises of images and questions that can be answered from the image. The question can broadly be classified into 
-1. relational : 
-What is the shape of object that is fartest from the gray object? or non-relational  
-2. non relational : 
-What is the shape of gray object.
+The dataset used for VQA generally comprises images and questions that can be answered from the image. The question can broadly be classified into 
+1. Relational : 
+What is the shape of the object that is farthest from the gray object? or non-relational  
+2. Non-Relational : 
+What is the shape of the gray object.
 
 ### Difficulties: 
-Most Visual QA datasets have following issues which make them training for VQA models difficult.
+Most Visual QA datasets have the following issues which make them training for VQA models difficult.
 
 1. Full vocabulary is not known
-2. Require knowledge about the realworld that cannot be captured in the training data
+2. Require knowledge about the real world that cannot be captured in the training data
 3. Contain Ambiguities and linguistic biases which are then carried into the model.
 ### Solution: CLEVR
-To avoid these issues, CLEVR dataset was proposed which contains 3D-rendered objects such as spheres, cubes and cylinders having different (not distinct) colours.
+To avoid these issues, the CLEVR dataset was proposed which contains 3D-rendered objects such as spheres, cubes and cylinders having different (not distinct) colors.
 
 Queries are formed that require understanding attributes such as location, shape, color and material.
 
-e.g: Is the cube same material as the cylinder? What is the color of sphere? 
+e.g: Is the cube the same material as the cylinder? What is the color of the sphere? 
 
-### Implementation Used: Sort-of-clevr
+### Implementation Used: Sort-of-CLEVR
+Dataset generated randomly that differs on following aspects from CLEVR datset
 
-Dataset genereted randomly that differs on following aspects from CLEVR datset
-
-1. Seperates relational and non-relational questions.
-2. Images contains 2D objects
+1. Separates relational and non-relational questions.
+2. Images contain 2D objects
 3. Each image has 6 objects of randomly chosen shape (square or circle)
 4. Each object in an image will have distinct color from the set of 6 colors (red, blue, green, orange, yellow, gray)
-5. Questions are hard-coded as fixed-length binary strings to avoid NLP related complexities and errors
-6. Around 10 relational and 10 non-relational question for each image.
+5. Questions are hard-coded as fixed-length binary strings to avoid NLP-related complexities and errors
+6. 10 relational and 10 non-relational questions for each image.
 
 
 ## Relational Networks: 
-Relational Networks are neural networks which can be mathematically described by below given equaion.
+Relational Networks are neural networks that can be mathematically described by equation stated below.
     $$ RN(O) = f_{\phi} (\Sigma_{i,j}g_{\theta}(o_i,o_j)) $$
     where
     $$O = \{ o_1, o_2, o_3, . . .o_n \}$$
     $ f_{\phi} $ and $ g_{\theta} $ are functions which will be MLPs with $\phi$ and $\theta$ being synaptic weights learned by the model
 
-Output of $g_{\theta}$ infers if the two object passed are related and in what way, thus aptly called 
+The output of $g_{\theta}$ infers if the two objects passed are related and in what way, thus aptly called 
 a relation.
 
 Relational Networks have three notable strengths:
 1. They infer relations <br/>
-- Since they operate on all pairs, they  do not need to know beforehand which objects are related. 
-2. Data efficient (Also makes them good candidate to be used in one shot learnings )<br/>
-- RNs use only one function for computing relations where input is object-object pair thus can better generalise relations.
-- In contrast if a traditional MLP approch were all $n$ objects are passed at once as input, it would have to learn and embed $n^2$ functions resulting in a high cost of learning for $n^2$ feedforward passes 
+- Since they operate on all pairs, they do not need to know beforehand which objects are related. 
+2. Data efficient (Also makes them good candidates to be used in one-shot learnings )<br/>
+- RNs use only one function for computing relations where input is object-object pair and thus can better generalize relations.
+- In contrast, if a traditional MLP approach were all $n$ objects are passed at once as input, it would have to learn and embed $n^2$ functions resulting in a high cost of learning for $n^2$ feedforward passes 
 
 2. Order invariant ( Since they operate on a set of objects)<br/>
 - This is ensured by the summation in the functional form.
-- Also ensures that output of RN contains information of relations that generally exist in the object set.
+- Also ensures that the output of RN contains information on relations that generally exist in the object set.
 
 ## Models
 
 The paper discusses three models which differ by the input provided to them
 ### 1. Pixels 
 
-Since inherently RN cannot deal with pixels, CNN is used to infer set of objects from input. 
+Since inherently RN cannot deal with pixels, CNN is used to infer a set of objects from the input. 
 
-Input images are of size 128 x 128 which are convolved through 4 layers to generate k feature map of size d x d. 
+Input images are of size 128 x 128 which are convolved through 4 layers to generate <I>k</I> feature map of size <I>d x d</I>. 
 
-In current implementation k = 24 and d = 3
-with stride = 2  and padding = 1 used at each level. Batch Normalization is also used here to ensure all features are processed equally disregarding the scale of values. This also acts as a way of relgularizing thus eliminating the need for dropouts. This also makes model less delicate to hyperparameter (learning rate). 
+The current implementation uses <I>k = 24</I> and <I>d = 3</I>
+with <I>stride = 2</I>  and <I>padding = 1</I> used at each level. Batch Normalization is also used here to ensure all features are processed equally disregarding the scale of values. This also acts as a way of regularizing thus eliminating the need for dropouts. This also makes the model less delicate to hyperparameter (learning rate). 
 
-ReLu was used as non-linearity applied after batchnorm in this implementation.
+ReLu was used as non-linearity applied after batch-norm in this implementation.
 
 snippet: 
 ```
@@ -101,43 +100,43 @@ class ConvInputModel(nn.Module):
 ```
 The output is of size : batch_size x k x (d + 2 x padding) x (d + 2 x padding)
 
-It is important to know that positions of each object is arbitrarily assigned by the RN and not something learned by the CNN.
+It is important to know that the positions of each object are arbitrarily assigned by the RN and not something learned by the CNN.
 
 ### 2. State Description
 
-since the RN does not take pixels of image as input anyway, Input can be described by specifing shape, color, x_coordinate, y_coordinate, etc of each object in object-object pair as a vector. 
+since the RN does not take pixels of an image as input anyway, Input can be described by specifying the shape, color, x_coordinate, y_coordinate, etc of each object in the object-object pair as a vector. 
 
 ### 3. Question
 
-The type of relations learned by RN should be question dependent. For the implementation modifies the RN architecture that can be functionally represented as below. where q denotes the question embedings. 
+The type of relations learned by RN should be question dependent. The implementation modifies the RN architecture that can be functionally represented below. where q denotes the question embeddings. 
 
 $$ RN(O) = f_{\phi} (\Sigma_{i,j}g_{\theta}(o_i,o_j,q)) $$
 
 
-The question embeddings can be generated using LSTM. A vocalbulary should be created so that each word from question can be assigned a unique integer enabling the LSTM to generate the question embedding.
+The question embeddings can be generated using LSTM. A vocabulary should be created so that each word from the question can be assigned a unique integer enabling the LSTM to generate the question embedding.
 
-At each timestep 1 word from sentence is passed as input to LSTM. LSTM here makes sense due to their ability to memorize important stuff. By propagating the final state of LSTM to RN we ensure this memory is passed to RN. 
+At each timestep, 1 word from the sentence is passed as input to LSTM. LSTM here makes sense due to their ability to memorize important stuff. By propagating the final state of LSTM to RN we ensure this memory is passed to RN. 
 
-For the current implementation, Sort-of-ClLEVR saves these embeding eliminating the need for LSTM. These are used to get the desired accuracy with CNN+RN model. For state description model LSTM was used anyway.
+For the current implementation, Sort-of-ClLEVR saves these embeddings eliminating the need for LSTM. These are used to get the desired accuracy with the CNN+RN model. For the state description model LSTM was used anyway.
 
 ### 4. Natural Language
 
-For dataset such as bAbI, where information about object also needs to be extracted from text, the paper suggests to identify about 20 sentences as support set which were immediately prior to the probe question. These sentences were also tagged with the position they occured relative to the question and processed word by word using LSTM. 
+For datasets such as bAbI, where information about the object also needs to be extracted from text, the paper suggests identifying about 20 sentences as support sets which were immediately before the probe question. These sentences were also tagged with the position they occurred relative to the question and processed word by word using LSTM. 
 
 ## Implementations
 
 ### Task 1: CNN + RN
 - Here we take image + question embedding as input.
-- The CNN implementation to extract object information from image is as discussed above. 
+- The CNN implementation to extract object information from images is as discussed above. 
 
 - Creating pairs from object set. <br/>
-    Each object of size 25 x 26 is mapped to every other object of same shape. And al such opject pairs from all images in batch along with the question embeddings are eventually converted into a tensor of shape 40000 x 70 which are then passed to the relation opertaion.
+    Each object of size 25 x 26 is mapped to every other object of the same shape. And al such object pairs from all images in batch along with the question embeddings are eventually converted into a tensor of shape 40000 x 70 which are then passed to the relation operation.
 
 - relation $g_{\theta}$ <br/>
-In our implementation, relation part of our RNN consists of 4 layer neural network the dimensions of which are as follows
+In our implementation, the relation part of our RNN consists of 4 fully connected neural layers having the dimensions as discussed below
     - Layer 1: <br/>
     Input: (batch_size * (24+2) * 2+18 ) x 70
-    where 24 is the number of kernels, 2 is the size co-ordinate representation for object. This is multiplied by 2 since we process pair of objects at a go. 18 is the size of embedding for question.<br/>
+    where 24 is the number of kernels, 2 is the size co-ordinate representation for the object. This is multiplied by 2 since we process pair of objects at a go. 18 is the size of the embedding for the question.<br/>
     Output: 256
 
     - Layer 2 - 4: <br/>
@@ -158,7 +157,7 @@ In our implementation, relation part of our RNN consists of 4 layer neural netwo
     ```
 - Summation of $g_{\theta}$ over set $O$
 
-    Summation is done over each batch for all obect pairs resulting in an object if size batch_size x 256
+    Summation is done over each batch for all object pairs resulting in an object if size batch_size x 256
 
     ``` # part of training process
     if self.relation_type == 'ternary':
@@ -175,7 +174,7 @@ Single layer with input = output = 256
     self.f_fc1 = nn.Linear(256, 256)
     ```
 - Output Layer: <br>
-    A fully connected netowrk of 2 layers is used to get the final output from the model
+    A fully connected network of 2 layers is used to get the final output from the model
 
     - Layer1: <br/>
     input: 64 x 256<br/>
@@ -209,16 +208,19 @@ Single layer with input = output = 256
 - Optimizer: <br/>
     The CNN + RN is trained using adam Gradient Descent Optimizer end to end
 ### Task 2: State Description + LTSM + RN
+In this task, we take a state description as input instead of an image. This eliminates the need for CNN as this information can directly be processed by RNN. 
 
-- In this task we take state description as input instead of image. This eliminates the need for CNN as this information can directly be processed by RNN
+- Since we are training on SORT-Of-CLEVR, the state description for each 
 
 - Also, instead of using question embedding directly, we use LSTM which outputs a vector of size 128 for each question.
+
+
 
 - LSTM <br/>
 todo: explain
 
 - RN <br/>
-todo: explain dimensions of each layers
+todo: explain the dimensions of each layer
 
 
 
