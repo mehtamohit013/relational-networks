@@ -36,20 +36,20 @@ For this project, we are using Sort-of-CLEVR dataset which differ from CLEVR dat
 In order to accurately capture the relations between objects for relational questions, relational networks has been used, which is given by: 
     $$RN(O) = f_{\phi} (\Sigma_{i,j}g_{\theta}(o_i,o_j))$$
 
-where $O = \{ o_1, o_2, o_3, . . .o_n \}$ dentoes the object set, with $ f_{\phi} $ and $ g_{\theta} $ being MLPs with $\phi$ and $\theta$ as synaptic weights learned by the model.
+where $O = \{ o_1, o_2, o_3, . . .o_n \}$ dentoes the object set, with $f_{\phi}$ and $g_{\theta}$ being MLPs with $\phi$ and $\theta$ as synaptic weights learned by the model.
 
-Here, $g_{\theta}$ helps us in infering the result whether the two objects are related, which is then passed through $f_{\phi}$ which determine the best answer based on all the relations.
+Here, $g_{\theta}$ helps us in infering the result whether the two objects are related and in what manner, which is then passed through $f_{\phi}$ to determine the best answer based on all the relations.
 
 The above formulation of relation networks has following strengths:
 
 - **They can infer relations without any prior knowledge**
-    RNs does not depends on any prior knowledge of relation between the two objects. Thereofore, RNs must learn to infer the existence and implications of object relations
+    RNs do not depend on any prior knowledge of the relation between the two objects. Therefore, RNs must learn to infer the existence and implications of object relations
 
 - **Data efficient** 
-    RNs only use a single function for computing relations where the input is a object pair which not only generalizes relations but also batching operation resulting in increase in speed considerably. In contrast, in a traditional MLP based approach the model has to learn and embed $n^2$ (where n is the number of objects) identical functions within its weight parameters to account for all possible object pairings.. Therefore, the cost of learning a relation function $n^2$ times using a single feedforward pass per sample, as in an MLP, is replaced by the cost of $n^2$ feedforward passes per object set(i.e., for each possible object pair in the set) and learning a relation function just once, as in an RN.
+    RNs only use a single function for computing relations where the input is an object pair, which not only generalizes relations but also uses batching that increases the speed considerably. In contrast, in a traditional MLP-based approach the model has to learn and embed $n^2$ (where n is the number of objects) identical functions within its weight parameters to account for all possible object pairings. Therefore, the cost of learning a relation function $n^2$ times using a single feedforward pass per sample, as in an MLP, is replaced by the cost of $n^2$ feedforward passes per object set(i.e., for each possible object pair in the set) and learning a relation function just once, as in an RN.
 
 - **Order invariant**
-    The summation in RN equation not only makes the RNs invariant to the order of objects in the input, but also ensures that the relation is generally representative of the relation.
+    The summation in the RN equation not only makes the RNs invariant to the order of objects in the input but also ensures that the model captures the generality of the relations.
 
 ## Model
 
@@ -58,9 +58,9 @@ The paper discusses the following models, which differ in the input provided to 
 
 Since inherently RN cannot deal with pixels, CNN is used to infer a set of objects from the input images and LSTM is used to infer the questions.
 
-Futhermore, to capture the relation between the question and object pair, RNs has been modified to also taken question embedding, which has been produced by passing question through a LSTM, to accurately capture the relations
+Futhermore, to capture the relation between the question and object pair, RNs has been modified to also take question embedding, which has been produced by passing question through an LSTM, to accurately capture the relations
 
-$$ RN(O,q) = f_{\phi} (\Sigma_{i,j}g_{\theta}(o_i,o_j,q)) $$
+$$RN(O,q) = f_{\phi} (\Sigma_{i,j}g_{\theta}(o_i,o_j,q))$$
 
 However, for the current implementation on Sort-of-CLEVR dataset, as the question length is same, the question has been converted into embeddings, eliminating the need of LSTMs.
 
