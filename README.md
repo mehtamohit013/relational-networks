@@ -1,6 +1,6 @@
-## This fork implements RN+LSTM+State Transistion model on Sort-of-Clevr dataset.
+## This fork implements RN+LSTM+State Transition model on Sort-of-Clevr dataset.
 
-### Summary of tasks can be found at [summary.md](summary.md)
+### (Part A) A summary of tasks can be found at [summary.md](summary.md)
 
 ## Setup
 Create conda environment from `environment.yml` file
