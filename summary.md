@@ -9,7 +9,7 @@
 The dataset used for VQA generally comprises images and questions that can be answered from the image. The question can broadly be classified into 
 1. Relational : What is the shape of the object that is farthest from the gray object?  
 
-2. Non-Relational : What is the shape of the gray object.
+2. Non-Relational : What is the shape of the gray object?
 
 ### Challenges: 
 It is highly challenging to produce an accurate dataset capturing Visual QA relations due to the following facts:
@@ -22,7 +22,7 @@ It is highly challenging to produce an accurate dataset capturing Visual QA rela
 To mitigate these issues, the CLEVR dataset was proposed which contains 3D-rendered objects such as spheres, cubes and cylinders having different (not distinct) colors, with different material types.
 
 <!-- Check the Question Example Provided -->
-In order to accurately answers these question, a model not only needs to understand object attributes such as location, shape, color and material, but also need to be accurately capture the relational data between two objects. Some example of relational questions include "Is the cube the same material as the cylinder?".
+In order to accurately answers these questions, a model not only needs to understand object attributes such as location, shape, color and material, but also need the ability to accurately capture the relational data between two objects. Some example of relational questions include "Is the cube the same material as the cylinder?".
 
 ### Implementation
 For this project, we are using Sort-of-CLEVR dataset which differ from CLEVR dataset in following ways:
@@ -34,7 +34,7 @@ For this project, we are using Sort-of-CLEVR dataset which differ from CLEVR dat
 
 # Relational Networks:
 In order to accurately capture the relations between objects for relational questions, relational networks has been used, which is given by: 
-    $$ RN(O) = f_{\phi} (\Sigma_{i,j}g_{\theta}(o_i,o_j)) $$
+    $$RN(O) = f_{\phi} (\Sigma_{i,j}g_{\theta}(o_i,o_j))$$
 
 where $O = \{ o_1, o_2, o_3, . . .o_n \}$ dentoes the object set, with $ f_{\phi} $ and $ g_{\theta} $ being MLPs with $\phi$ and $\theta$ as synaptic weights learned by the model.
 
