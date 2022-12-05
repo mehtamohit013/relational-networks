@@ -1,3 +1,25 @@
+## This fork implements RN+LSTM+State Transistion model on Sort-of-Clevr dataset.
+
+### Summary of tasks can be found at [summary.md](summary.md)
+
+## Setup
+Create conda environment from `environment.yml` file
+```
+$ conda env create -f environment.yml
+```
+Activate environment
+```
+$ conda activate RN3
+```
+## Generate Sort-of-CLEVR 
+```python sort_of_clevr_generator.py```
+## Task 1
+ ```python main.py --seed=42``` 
+## Task 2
+ ```python task2.py```
+<hr>
+
+
 Pytorch implementation of Relational Networks - [A simple neural network module for relational reasoning](https://arxiv.org/pdf/1706.01427.pdf)
 
 Implemented & tested on Sort-of-CLEVR task.

@@ -1,0 +1,5 @@
+Team Members: Mohit Mehta (mm12318), Umang Shah(uks8451), Surya Narayan(sn3402)
+GitHub Repo: https://github.com/mehtamohit013/relational-networks
+Part A: https://github.com/mehtamohit013/relational-networks/blob/master/summary.md
+Part B Task 1: https://github.com/mehtamohit013/relational-networks/blob/master/main.py
+Part B Task 2: https://github.com/mehtamohit013/relational-networks/blob/master/task2.py
