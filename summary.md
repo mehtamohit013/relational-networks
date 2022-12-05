@@ -191,10 +191,10 @@ Single layer with input = output = 256
     When setting the seed value to 42 with a learning rate = 0.0001,  an accuracy of 97% on training data and 91%  on test data was achieved for relational questions after 40 epochs.\
     Similarly, an accuracy of 99% was achieved on both test and training data for the non-relational model
 
-    Non relational accuracy over epoch.
+    Non relational accuracy over epoch.\
     ![Non-Relational Accuracy](images/task-1-unary-accuracy.png)
 
-    Relational accuracy over epoch
+    Relational accuracy over epoch\
     ![Non-Relational Accuracy](images/task1-binary-accuracy.png)
 
     [CSV for relational train accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_train_unary-tag-Accuracy_train.csv)
