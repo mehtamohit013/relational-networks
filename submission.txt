@@ -1,5 +1,15 @@
 Team Members: Mohit Mehta (mm12318), Umang Shah(uks8451), Surya Narayan(sn3402)
 GitHub Repo: https://github.com/mehtamohit013/relational-networks
 Part A: https://github.com/mehtamohit013/relational-networks/blob/master/summary.md
+
 Part B Task 1: https://github.com/mehtamohit013/relational-networks/blob/master/main.py
+Accuracy Epoch mapping Relational Train : https://github.com/mehtamohit013/relational-networks/blob/master/csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_train_binary-tag-Accuracy_train.csv
+Accuracy Epoch mapping Relational Test : https://github.com/mehtamohit013/relational-networks/blob/master/csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_test_binary-tag-Accuracy_test.csv
+Accuracy Epoch mapping Non Relational Train : https://github.com/mehtamohit013/relational-networks/blob/master/csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_train_unary-tag-Accuracy_train.csv
+Accuracy Epoch mapping Non Relational Test : https://github.com/mehtamohit013/relational-networks/blob/master/csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_test_unary-tag-Accuracy_test.csv
+
 Part B Task 2: https://github.com/mehtamohit013/relational-networks/blob/master/task2.py
+Accuracy Epoch mapping Relational Train : https://github.com/mehtamohit013/relational-networks/blob/master/csvs/run-.-tag-Binary%20Train%20Accuracy.csv
+Accuracy Epoch mapping Relational Test : https://github.com/mehtamohit013/relational-networks/blob/master/csvs/run-.-tag-Binary%20Validation%20Accuracy.csv
+Accuracy Epoch mapping Non Relational Train : https://github.com/mehtamohit013/relational-networks/blob/master/csvs/run-.-tag-Unary%20Train%20Accuracy.csv
+Accuracy Epoch mapping Non Relational Test : https://github.com/mehtamohit013/relational-networks/blob/master/csvs/run-.-tag-Unary%20Validation%20Accuracy.csv
