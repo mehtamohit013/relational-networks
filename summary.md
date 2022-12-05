@@ -3,23 +3,7 @@
  Mohit Mehta(mm12318@nyu.edu)&nbsp;&nbsp;&nbsp; Umang Shah(uks8451@nyu.edu)&nbsp;&nbsp;&nbsp; Surya Narayan(sn3402@nyu.edu)
 <hr>
 
-# Reproducing results
-## Setup
-Create conda environment from `environment.yml` file
-```
-$ conda env create -f environment.yml
-```
-Activate environment
-```
-$ conda activate RN3
-```
-## Generate Sort-of-CLEVR 
-```python sort_of_clevr_generator.py```
-## Task 1
- ```python main.py --seed=42``` 
-## Task 2
- ```python task2.py```
-<hr>
+
 
 # Dataset
 The dataset used for VQA generally comprises images and questions that can be answered from the image. The question can broadly be classified into 
