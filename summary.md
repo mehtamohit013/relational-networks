@@ -197,13 +197,13 @@ Single layer with input = output = 256
     Relational accuracy over epoch\
     ![Non-Relational Accuracy](images/task1-binary-accuracy.png)
 
-    [CSV for relational train accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_train_unary-tag-Accuracy_train.csv)
+    [CSV for relational train accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_train_binary-tag-Accuracy_train.csv)
 
-    [CSV for relational test accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_test_unary-tag-Accuracy_test.csv)
+    [CSV for relational test accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_test_binary-tag-Accuracy_test.csv)
 
-    [CSV for non-relational train accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_train_binary-tag-Accuracy_train.csv)
+    [CSV for non-relational train accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_train_unary-tag-Accuracy_train.csv)
 
-    [CSV for non-relational test accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_test_binary-tag-Accuracy_test.csv)
+    [CSV for non-relational test accuracy](csvs/run-Dec02_04-41-09_1fb17b539b50_Accuracy_test_unary-tag-Accuracy_test.csv)
 
 - Other attempts at tuning\
     When training the model with a higher learning rate (0.0005), It took 60 epochs for the accuracies to stabilize to (3% in the test and 96% on training data. \
@@ -243,7 +243,15 @@ One of the benifits of using state description model is that the model completel
 We acheive the best test result by using a learning rate of <b>0.0003</b> resulting in training and testing accuracy of around <b>94%</b> after <b>40</b> epochs.
 
 
-![Non-Relational Accuracy](images/task2-combined-accuracy.png)
+![Combined Accuracy](images/task2-combined-accuracy.png)
+
+[CSV for relational train accuracy](csvs/run-.-tag-Binary%20Train%20Accuracy.csv)
+
+[CSV for relational test accuracy](csvs/run-.-tag-Binary%20Validation%20Accuracy.csv)
+
+[CSV for non-relational train accuracy](csvs/run-.-tag-Unary%20Train%20Accuracy.csv)
+
+[CSV for non-relational test accuracy](csvs/run-.-tag-Unary%20Validation%20Accuracy.csv)
 
 
 # Results
